@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<title>Viral Interactive Neon Resume Generator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Poppins,sans-serif;}
+
+body{
+  height:100vh;
+  overflow:hidden;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  color:#fff;
+  position:relative;
+}
+
+/* 🔥 DISCO NEON WALLPAPER */
+body{
+  background:
+    radial-gradient(circle at 20% 30%, #ff00ff55, transparent 40%),
+    radial-gradient(circle at 80% 20%, #00ffff55, transparent 40%),
+    radial-gradient(circle at 50% 80%, #39ff1455, transparent 40%),
+    radial-gradient(circle at 10% 70%, #ffbf0055, transparent 40%),
+    linear-gradient(120deg,#060012,#0a001a,#050014);
+  background-size:200% 200%;
+  animation:discoBG 12s linear infinite;
+}
+
+@keyframes discoBG{
+  0%{background-position:0% 50%}
+  50%{background-position:100% 50%}
+  100%{background-position:0% 50%}
+}
+
+/* ✨ STARS */
+#starsContainer{position:absolute;inset:0;z-index:0;pointer-events:none;}
+.star{
+  position:absolute;width:2px;height:2px;
+  background:#fff;border-radius:50%;
+  animation:twinkle 3s infinite alternate;
+}
+@keyframes twinkle{
+  0%{opacity:.3}
+  100%{opacity:1}
+}
+
+/* 🌈 NEON ORBS */
+.orb{
+  position:absolute;
+  width:220px;height:220px;
+  border-radius:50%;
+  filter:blur(90px);
+  opacity:.8;
+  animation:float 10s ease-in-out infinite alternate;
+}
+.orb.pink{background:#ff4ecd;top:5%;left:5%}
+.orb.blue{background:#00f7ff;bottom:10%;right:5%}
+.orb.green{background:#39ff14;top:60%;left:30%}
+@keyframes float{to{transform:translateY(-60px)}}
+
+/* 🔄 FLIP CARD */
+.scene{width:480px;height:650px;perspective:1200px;z-index:5}
+.card{
+  width:100%;height:100%;
+  transform-style:preserve-3d;
+  transition:1s;
+}
+.card.flip{transform:rotateY(180deg)}
+.side{
+  position:absolute;inset:0;
+  background:rgba(10,10,15,.9);
+  backdrop-filter:blur(25px);
+  border-radius:25px;
+  padding:20px;
+  border:1px solid rgba(255,255,255,.25);
+  backface-visibility:hidden;
+  overflow-y:auto;
+}
+.back{transform:rotateY(180deg)}
+
+/* ✨ HEADINGS */
+h2{
+  color:#fff;
+  text-shadow:0 0 15px #fff,0 0 30px #ff69b4;
+  margin-bottom:8px;
+}
+
+/* INPUTS */
+input,textarea{
+  width:100%;
+  padding:10px;
+  margin-bottom:10px;
+  background:rgba(255,255,255,.06);
+  border:none;border-radius:6px;
+  color:#fff;outline:none;
+}
+input:focus,textarea:focus{
+  box-shadow:0 0 20px #ff69b4 inset;
+}
+
+/* 🔘 BUTTONS */
+.neon-btn{
+  padding:10px 18px;
+  border:none;border-radius:8px;
+  background:#ff69b4;
+  color:#fff;cursor:pointer;
+  box-shadow:0 0 20px #ff69b4;
+  transition:.3s;
+}
+.neon-btn:hover{
+  transform:scale(1.08);
+  box-shadow:0 0 40px #ff69b4,0 0 80px #ff1493;
+}
+
+/* RESUME PREVIEW */
+#resumePreview{
+  width:440px;
+  margin-top:15px;
+  opacity:0;
+  transition:1s;
+}
+
+/* ACCORDION */
+.accordion{
+  background:rgba(255,255,255,.08);
+  padding:10px;
+  border-radius:6px;
+  cursor:pointer;
+}
+.panel{
+  display:none;
+  padding:8px;
+}
+
+/* SKILLS */
+.skill-bar{
+  background:rgba(255,255,255,.1);
+  border-radius:6px;
+  margin-bottom:8px;
+}
+.skill-fill{
+  height:12px;
+  width:0%;
+  background:#ff69b4;
+  transition:1s;
+}
+
+@media(max-width:500px){
+  .scene{width:90%;height:600px}
+}
+</style>
+</head>
+
+<body>
+
+<div id="starsContainer"></div>
+<div class="orb pink"></div>
+<div class="orb blue"></div>
+<div class="orb green"></div>
+
+<div class="scene">
+  <div class="card" id="card">
+
+    <div class="side front">
+      <h2>Contact Info</h2>
+      <input id="name" placeholder="Full Name">
+      <input id="email" placeholder="Email">
+      <input id="phone" placeholder="Phone">
+      <h2>Objective</h2>
+      <textarea id="objective"></textarea>
+      <button class="neon-btn" onclick="flipCard()">Next →</button>
+    </div>
+
+    <div class="side back">
+      <h2>Education</h2>
+      <textarea id="education"></textarea>
+      <h2>Experience</h2>
+      <textarea id="experience"></textarea>
+      <h2>Skills</h2>
+      <textarea id="skillsInput"></textarea>
+      <button class="neon-btn" onclick="generateResume()">Generate</button>
+      <button class="neon-btn" onclick="flipCard()">← Back</button>
+    </div>
+
+  </div>
+</div>
+
+<div id="resumePreview"></div>
+
+<script>
+// ⭐ STARS
+const stars=document.getElementById("starsContainer");
+for(let i=0;i<100;i++){
+  let s=document.createElement("div");
+  s.className="star";
+  s.style.top=Math.random()*100+"%";
+  s.style.left=Math.random()*100+"%";
+  stars.appendChild(s);
+}
+
+// 🔄 FLIP
+function flipCard(){
+  document.getElementById("card").classList.toggle("flip");
+}
+
+// 📄 GENERATE
+function generateResume(){
+  let skills=document.getElementById("skillsInput").value.split(",");
+  let bars="";
+  skills.forEach(s=>{
+    bars+=`<div class="skill-bar"><div class="skill-fill"></div></div>`;
+  });
+
+  const r=document.getElementById("resumePreview");
+  r.innerHTML=`
+    <div style="padding:15px;background:#111;border-radius:12px;box-shadow:0 0 30px #ff69b4">
+      <h2>${name.value}</h2>
+      <p>${email.value} | ${phone.value}</p>
+      <h2>Skills</h2>${bars}
+    </div>`;
+  r.style.opacity=1;
+
+  document.querySelectorAll(".skill-fill").forEach(b=>{
+    setTimeout(()=>b.style.width="80%",200);
+  });
+}
+</script>
+
+</body>
+</html>
